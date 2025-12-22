@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Compile Include="..\TomsToolbox.Wpf\DispatcherThrottle.cs" Link="DispatcherThrottle.cs" />
+    <Compile Include="..\TomsToolbox.Wpf\ObservableObject.cs" Link="ObservableObject.cs" />
     <Compile Include="..\TomsToolbox.Wpf\ObservableObjectBase.cs" Link="ObservableObjectBase.cs" />
     <Compile Include="..\TomsToolbox.Wpf\PropertyDependencyAttribute.cs" Link="PropertyDependencyAttribute.cs" />
     <Compile Include="..\TomsToolbox.Wpf\Throttle.cs" Link="Throttle.cs" />

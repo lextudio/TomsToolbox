@@ -1,7 +1,5 @@
 ﻿namespace TomsToolbox.Wpf;
 
-using System.Windows.Threading;
-
 /// <summary>
 /// Like <see cref="ObservableObjectBase" />, with an additional dispatcher field to track the owning thread.
 /// This version is not serializable, since <see cref="Dispatcher"/> is not.
@@ -12,5 +10,5 @@ public abstract class ObservableObject : ObservableObjectBase
     /// <summary>
     /// Gets the dispatcher of the thread where this object was created.
     /// </summary>
-    public Dispatcher Dispatcher { get; } = Dispatcher.CurrentDispatcher;
+    public Dispatcher Dispatcher { get; } = DispatcherExtensions.CurrentDispatcher;
 }
