@@ -9,6 +9,10 @@ using System.Windows.Threading;
 /// </summary>
 public static class DispatcherExtensions
 {
+    /// <summary>Gets the <see cref="T:System.Windows.Threading.Dispatcher" /> for the thread currently executing and creates a new <see cref="T:System.Windows.Threading.Dispatcher" /> if one is not already associated with the thread.</summary>
+    /// <returns>The dispatcher associated with the current thread.</returns>
+    public static Dispatcher CurrentDispatcher => Dispatcher.CurrentDispatcher;
+
     /// <summary>
     /// Invokes the specified method in the dispatcher thread.
     /// </summary>

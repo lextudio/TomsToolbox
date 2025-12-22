@@ -4,5 +4,5 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en-US")]
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]
 [assembly: ComVisible(false)]
