@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 
@@ -23,6 +24,7 @@ using TomsToolbox.Essentials;
 /// The default implementation examines <see cref="ValidationAttribute"/> on the affected properties to retrieve error information.
 /// </remarks>
 [Serializable]
+[DataContract(IsReference = true)]
 public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorInfo, INotifyDataErrorInfo
 {
     private static readonly AutoWeakIndexer<Type, IDictionary<string, IEnumerable<string>>> _dependencyMappingCache = new(PropertyDependencyAttribute.CreateDependencyMapping);
@@ -82,12 +84,29 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
     /// </summary>
     protected void DetachEventSources()
     {
-        foreach (var item in EventSources.Values.Select(item => item.GetTargetOrDefault()).ExceptNullItems())
-        {
-            item.PropertyChanged -= RelaySource_PropertyChanged;
-        }
+        if (_eventSources == null)
+            return;
 
-        EventSources.Clear();
+        try
+        {
+            foreach (var item in _eventSources.Values.Select(item => item.GetTargetOrDefault()).ExceptNullItems())
+            {
+                try
+                {
+                    item.PropertyChanged -= RelaySource_PropertyChanged;
+                }
+                catch
+                {
+                    // Ignore errors during detach, especially when called from finalizer.
+                }
+            }
+
+            _eventSources.Clear();
+        }
+        catch
+        {
+            // Ignore errors during detach
+        }
     }
 
     /// <summary>
@@ -304,7 +323,14 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
     /// <inheritdoc />
     ~ObservableObjectBase()
     {
-        DetachEventSources();
+        try
+        {
+            DetachEventSources();
+        }
+        catch
+        {
+            // Ignore errors in finalizer
+        }
     }
 
     private event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
@@ -337,10 +363,12 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
 /// This version is not serializable, since <see cref="Dispatcher"/> is not.
 /// </summary>
 /// <seealso cref="ObservableObjectBase" />
+[DataContract(IsReference = true)]
 public abstract class ObservableObject : ObservableObjectBase
 {
     /// <summary>
     /// Gets the dispatcher of the thread where this object was created.
     /// </summary>
+    [IgnoreDataMember]
     public Dispatcher Dispatcher { get; } = Dispatcher.CurrentDispatcher;
 }
