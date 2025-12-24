@@ -7,9 +7,13 @@ namespace TomsToolbox.Wpf;
 /// </summary>
 public static class DispatcherExtensions
 {
-    /// <summary>Gets the <see cref="T:Dispatcher" /> for the UI thread and creates a new <see cref="T:Dispatcher" /> if one is not already associated with the thread.</summary>
+    /// <summary>Gets the <see cref="Dispatcher" /> for the application's main thread. In Avalonia this is always the UIThread</summary>
     /// <returns>The dispatcher associated with the UI thread.</returns>
     public static Dispatcher CurrentDispatcher => Dispatcher.UIThread;
+
+    /// <summary>Gets the <see cref="Dispatcher" /> for the application's main thread.</summary>
+    /// <returns>The dispatcher associated with applications main thread.</returns>
+    public static Dispatcher UIThreadDispatcher => Dispatcher.UIThread;
 
     /// <summary>
     /// Executes the specified method on the dispatcher thread asynchronously, using the WPF-style naming convention.
