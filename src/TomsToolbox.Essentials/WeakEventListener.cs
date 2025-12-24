@@ -44,7 +44,7 @@ public class WeakEventListener<TTarget, TSource, TEventArgs> : IWeakEventListene
     /// <summary>
     /// Delegate to the method to call when the event fires.
     /// </summary>
-    private readonly Action<TTarget, object, TEventArgs> _onEventAction;
+    private readonly Action<TTarget, object?, TEventArgs> _onEventAction;
 
     /// <summary>
     /// Delegate to the method to call when detaching from the event.
@@ -60,7 +60,7 @@ public class WeakEventListener<TTarget, TSource, TEventArgs> : IWeakEventListene
     /// <param name="onAttachAction">The static action to attach to the event(s).</param>
     /// <param name="onDetachAction">The static action to detach from the event(s).</param>
     public WeakEventListener(TTarget target, TSource source,
-        Action<TTarget, object, TEventArgs> onEventAction,
+        Action<TTarget, object?, TEventArgs> onEventAction,
         Action<WeakEventListener<TTarget, TSource, TEventArgs>, TSource> onAttachAction,
         Action<WeakEventListener<TTarget, TSource, TEventArgs>, TSource> onDetachAction)
     {
@@ -84,7 +84,7 @@ public class WeakEventListener<TTarget, TSource, TEventArgs> : IWeakEventListene
     /// <param name="onAttachAction">The static action to attach to the event(s).</param>
     /// <param name="onDetachAction">The static action to detach from the event(s).</param>
     public WeakEventListener(TTarget target, WeakReference<TSource> source,
-        Action<TTarget, object, TEventArgs> onEventAction,
+        Action<TTarget, object?, TEventArgs> onEventAction,
         Action<WeakEventListener<TTarget, TSource, TEventArgs>, TSource> onAttachAction,
         Action<WeakEventListener<TTarget, TSource, TEventArgs>, TSource> onDetachAction)
     {
@@ -107,7 +107,7 @@ public class WeakEventListener<TTarget, TSource, TEventArgs> : IWeakEventListene
     /// </summary>
     /// <param name="source">Event source.</param>
     /// <param name="eventArgs">Event arguments.</param>
-    public void OnEvent(object source, TEventArgs eventArgs)
+    public void OnEvent(object? source, TEventArgs eventArgs)
     {
         if (_weakTarget.TryGetTarget(out var target))
         {

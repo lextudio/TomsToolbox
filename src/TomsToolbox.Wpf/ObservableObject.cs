@@ -36,7 +36,7 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
     private IDictionary<Type, IDictionary<string, string>>? _relayMapping;
 
     [NonSerialized]
-    private Dictionary<Type, WeakReference<INotifyPropertyChanged>>? _eventSources;
+    private Dictionary<Type, IWeakEventListener>? _eventSources;
 
     /// <summary>
     /// Relays the property changed events of the source object (if not null) and detaches the old source (if not null).
@@ -69,14 +69,19 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
         if (RelayMapping.Keys.All(key => key?.IsAssignableFrom(sourceType) != true))
             throw new InvalidOperationException(@"This class has no property with a RelayedEventAttribute for the type " + sourceType);
 
-        if (EventSources.TryGetValue(sourceType, out var oldListener) && oldListener.TryGetTarget(out var oldTarget))
+        if (EventSources.TryGetValue(sourceType, out var oldListener))
         {
-            oldTarget.PropertyChanged -= RelaySource_PropertyChanged;
+            oldListener.Detach();
         }
 
-        source.PropertyChanged += RelaySource_PropertyChanged;
+        var listener = new WeakEventListener<ObservableObjectBase, INotifyPropertyChanged, PropertyChangedEventArgs>(
+            this,
+            new WeakReference<INotifyPropertyChanged>(source),
+            (target, s, e) => target.RelaySource_PropertyChanged(s, e),
+            (l, s) => s.PropertyChanged += l.OnEvent,
+            (l, s) => s.PropertyChanged -= l.OnEvent);
 
-        EventSources[sourceType] = new WeakReference<INotifyPropertyChanged>(source);
+        EventSources[sourceType] = listener;
     }
 
     /// <summary>
@@ -89,11 +94,11 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
 
         try
         {
-            foreach (var item in _eventSources.Values.Select(item => item.GetTargetOrDefault()).ExceptNullItems())
+            foreach (var item in _eventSources.Values)
             {
                 try
                 {
-                    item.PropertyChanged -= RelaySource_PropertyChanged;
+                    item.Detach();
                 }
                 catch
                 {
@@ -117,9 +122,9 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
     {
         var sourceType = item.GetType();
 
-        if (EventSources.TryGetValue(sourceType, out var oldListener) && oldListener.TryGetTarget(out var target))
+        if (EventSources.TryGetValue(sourceType, out var listener))
         {
-            target.PropertyChanged -= RelaySource_PropertyChanged;
+            listener.Detach();
             EventSources.Remove(sourceType);
         }
     }
@@ -238,13 +243,12 @@ public abstract class ObservableObjectBase : INotifyPropertyChanged, IDataErrorI
         }
     }
 
-    private Dictionary<Type, WeakReference<INotifyPropertyChanged>> EventSources => _eventSources ??= new Dictionary<Type, WeakReference<INotifyPropertyChanged>>();
+    private Dictionary<Type, IWeakEventListener> EventSources => _eventSources ??= new Dictionary<Type, IWeakEventListener>();
 
     private IDictionary<Type, IDictionary<string, string>> RelayMapping => _relayMapping ??= _relayMappingCache[GetType()];
 
     private IDictionary<string, IEnumerable<string>> DependencyMapping => _dependencyMapping ??= _dependencyMappingCache[GetType()];
 
-    [WeakEventHandler.MakeWeak]
     private void RelaySource_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender == null || e.PropertyName == null)
