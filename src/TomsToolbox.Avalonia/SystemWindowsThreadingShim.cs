@@ -37,6 +37,16 @@
         }
 
         /// <summary>
+        /// BeginInvoke overload used in code: BeginInvoke(DispatcherPriority, Action)
+        /// </summary>
+        /// <param name="priority"></param>
+        /// <param name="callback"></param>
+        public void BeginInvoke<T>(DispatcherPriority priority, Action<T> callback, T args)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => callback.DynamicInvoke(args), Translate(priority));
+        }
+
+        /// <summary>
         /// BeginInvoke overload used in code: BeginInvoke(DispatcherPriority, Delegate)
         /// </summary>
         /// <param name="priority"></param>
