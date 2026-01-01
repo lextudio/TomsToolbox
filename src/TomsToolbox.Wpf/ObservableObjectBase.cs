@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-
+using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 using TomsToolbox.Essentials;
@@ -18,6 +18,7 @@ using TomsToolbox.Essentials;
 /// The default implementation examines <see cref="ValidationAttribute"/> on the affected properties to retrieve error information.
 /// </remarks>
 [Serializable]
+[DataContract(IsReference = true)]
 public abstract partial class ObservableObjectBase : INotifyPropertyChanged, IDataErrorInfo, INotifyDataErrorInfo
 {
     private static readonly AutoWeakIndexer<Type, IDictionary<string, IEnumerable<string>>> _dependencyMappingCache = new(PropertyDependencyAttribute.CreateDependencyMapping);
